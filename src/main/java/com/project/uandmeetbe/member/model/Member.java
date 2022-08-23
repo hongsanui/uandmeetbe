@@ -1,5 +1,7 @@
 package com.project.uandmeetbe.member.model;
 
+import com.project.uandmeetbe.area.ActiveAreas;
+import com.project.uandmeetbe.interest.Interests;
 import com.project.uandmeetbe.member.dto.MemberDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +36,7 @@ public class Member implements UserDetails {
     @Column(name = "MEMBER_NICKNAME")
     private String nickname;
 
+    // TODO: 2022-08-23 이메일 + 소셜 이좋을까, 소셜만 하는게 좋을까?
 //    @Column(name = "MEMBER_PASSWORD")
 //    private String password;
 
@@ -71,6 +74,14 @@ public class Member implements UserDetails {
     @Column(name = "PROVIDER", length = 20)
     @Enumerated(EnumType.STRING)
     private Provider provider;
+
+    @OneToMany(mappedBy = "member")
+    private List<Interests> interestsList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<ActiveAreas> activeAreas = new ArrayList<>();
+
+    // TODO: 2022-08-23 프로필 이미지 추가해야함!
 
 
     @ElementCollection(fetch = FetchType.EAGER)

@@ -12,7 +12,6 @@ import lombok.ToString;
 @Builder
 public class MemberDTO {
 
-    private Long memberSequenceId;
     private String email;
     private String nickname;
     private String memberBirthYear;
@@ -25,6 +24,8 @@ public class MemberDTO {
     private Gender gender;
     private Role role;
     private Provider provider;
+
+    // TODO: 2022-08-23 프로필 이미지 추가해야함! 
 }
 
 //스프링부트 / 스프링 시큐리티 -> 스프링 시큐리티

@@ -22,7 +22,14 @@ public class MemberService {
     public Optional<Member> getMemberFindByEmail(String email){
         return memberRepository.findByEmail(email);
     }
+    public Optional<Member> getMemberFindByNickname(String nickname){
+        return memberRepository.findByNickname(String nickname);
+    }
 
+    /**회원가입
+     *
+     * @param memberDTO
+     */
     public void memberSignup(MemberDTO memberDTO){
 
         Member member = Member.builder()

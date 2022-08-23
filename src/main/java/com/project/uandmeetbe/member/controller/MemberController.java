@@ -8,6 +8,7 @@ import com.project.uandmeetbe.member.service.MemberService;
 import com.project.uandmeetbe.jwt.JwtService;
 import com.project.uandmeetbe.jwt.JwtTokenProvider;
 import com.project.uandmeetbe.jwt.Token;
+import com.project.uandmeetbe.response.DefaultResponse;
 import com.project.uandmeetbe.response.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,67 +34,68 @@ public class MemberController {
 
     // 회원가입 요청
     @PostMapping("/member")
-    public Map<String, String> memberSignup(@RequestBody MemberDTO memberDTO) {
+    public ResponseEntity<DefaultResponse> userSignup(@RequestBody MemberDTO memberDTO) {
 
         log.info("/member 요청됨");
-        Map<String, String> map = new HashMap<>();
-        map.put("memberSignup", "true");
+        log.info("memberDTO ----> {}", memberDTO);
 
-        // 잘못된 인수가 메서드에 요청될 경우 exception 발생
-        /*Optional.of(memberService.memberSignup(memberDTO)).orElseThrow(
-                () -> new IllegalArgumentException("부적절한 파라미터가 요청되었습니다. -> "));*/
+        memberService.memberSignup(memberDTO);
 
-        log.info("memberDTO -------------------> " + memberDTO);
+        DefaultResponse response = new DefaultResponse(Code.GOOD_REQUEST);
 
-        try {
-            memberService.memberSignup(memberDTO);
-        } catch (IllegalArgumentException e) {
-            e.getMessage();
-            map.put("memberSignup", "false");
-        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
 
-        return map;
+
     }
 
     //로그인
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@RequestBody Map<String, String> member, @RequestHeader("User-Agent") String memberAgent){
+
         log.info("member email = {}", member.get("email"));
+
         Member member1 = memberRepository.findByEmail(member.get("email"))
                 .orElseThrow(
                         () -> new UsernameNotFoundException("가입되지 않은 이메일 입니다."));
 
         Token tokenDto = jwtTokenProvider.createAccessToken(member1.getUsername(),member1.getRoles());
+
         log.info("getRole = {}", member1.getRoles());
+
         jwtService.login(tokenDto, memberAgent);
         TokenResponse tokenResponse = new TokenResponse(Code.GOOD_REQUEST,tokenDto);
         return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/member/check")
-    public Map<String, String> memberCheck(@RequestBody MemberDTO memberDTO) {
 
-        Map<String, String> map = new HashMap<>();
+    // 회원 유무 확인 (이메일로 회원 조회)
+    @GetMapping("/user/check")
+    public ResponseEntity userCheck(String email, String userName, String provider) {
 
-        try {
-            Optional<Member> member = memberService.getMemberFindByEmail(memberDTO.getEmail());
 
-            // 회원 조회에 성공했을 경우. (데이터가 있을 경우)
-            if (member.isPresent()) {
-                map.put("memberCheck", "true");
-                return map;
-
-            }
-            map.put("memberCheck", "false");
-            return map;
-
-        } catch (NoSuchElementException e) {
-            log.info("요청 데이터의 값이 없습니다. -> " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.info("잘못된 파라미터 요청 입니다. -> " + e.getMessage());
+        if(memberService.sinUpCheck(email)){
+            DefaultResponse userResponse = new DefaultResponse(Code.GOOD_REQUEST);
+            return new ResponseEntity<>(userResponse, HttpStatus.OK);
         }
 
-        return map;
+
+        DefaultResponse userResponse = new DefaultResponse(Code.GOOD_REQUEST);
+
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    }
+
+    // 닉네임 중복 확인 (닉네임으로 회원 조회)
+    @GetMapping("/duplication")
+    public ResponseEntity findByUserNickname(String nickname) {
+
+        if(memberService.duplicationCheck(nickname)){
+            DefaultResponse response = new DefaultResponse(Code.GOOD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+
+        DefaultResponse response = new DefaultResponse(Code.DUPLICATED_NICKNAME);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 

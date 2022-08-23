@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+//인증단계에서의 예외 [만료된 토큰]
 @Slf4j
 @RequiredArgsConstructor
 public class JwtExceptionFilter extends OncePerRequestFilter {
